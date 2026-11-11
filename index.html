@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DataQuest — Learning Dashboard</title>
+<style>
+:root{--bg:#0b1020;--panel:#141d33;--panel2:#1a2742;--text:#eef3ff;--muted:#9baaca;--cyan:#63e6e2;--purple:#b69cff;--gold:#ffd166;--green:#79e0a1;--red:#ff8795}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 80% 0,#1b2850 0,transparent 34%),var(--bg);color:var(--text);font:15px/1.5 system-ui,Segoe UI,sans-serif}
+main{max-width:1200px;margin:auto;padding:28px 20px 60px}.top{display:flex;justify-content:space-between;gap:18px;align-items:center;flex-wrap:wrap}
+h1{font-size:clamp(28px,5vw,42px);margin:0}.sub,.muted{color:var(--muted)}.tag{color:var(--cyan);font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:11px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:22px 0}.card{background:linear-gradient(145deg,var(--panel),#111a2e);border:1px solid #2b3957;border-radius:18px;padding:18px;box-shadow:0 12px 32px #0002}
+.metric{font-size:30px;font-weight:800;margin-top:5px}.metric small{font-size:13px;color:var(--muted);font-weight:500}
+.layout{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}.section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}h2{font-size:18px;margin:0}
+button{border:0;border-radius:11px;padding:10px 14px;background:var(--cyan);color:#07151c;font-weight:800;cursor:pointer}button.secondary{background:#263654;color:var(--text);border:1px solid #405274}button.danger{background:#482b3a;color:#ffdce2}
+input,select,textarea{width:100%;background:#0d1629;border:1px solid #344462;border-radius:10px;padding:10px;color:var(--text);font:inherit}
+label{display:block;color:var(--muted);font-size:12px;margin:10px 0 5px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.course{padding:13px 0;border-bottom:1px solid #293752}.course:last-child{border:0}.coursehead{display:flex;justify-content:space-between;gap:10px}.bar{height:9px;background:#273550;border-radius:20px;overflow:hidden;margin-top:9px}.bar span{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--purple));border-radius:20px}
+.pill{font-size:11px;color:var(--cyan);border:1px solid #32616b;padding:3px 8px;border-radius:30px;white-space:nowrap}
+.skill{display:grid;grid-template-columns:95px 1fr 35px;gap:10px;align-items:center;margin:13px 0}.skill .bar{margin:0}
+.log{display:grid;grid-template-columns:1fr auto;gap:10px;padding:10px 0;border-bottom:1px solid #293752}.log:last-child{border:0}
+.xp{color:var(--gold);font-weight:800}.empty{padding:20px;text-align:center;color:var(--muted)}
+#toast{position:fixed;bottom:20px;right:20px;background:#203b45;border:1px solid #4b9997;padding:12px 16px;border-radius:12px;display:none}
+footer{color:var(--muted);font-size:12px;margin-top:20px}
+@media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}.layout{grid-template-columns:1fr}}
+@media(max-width:480px){.grid{grid-template-columns:1fr 1fr}.formgrid{grid-template-columns:1fr}.metric{font-size:25px}}
+</style>
+</head>
+<body><main>
+<div class="top"><div><div class="tag">Your learning campaign</div><h1>⚡ DataQuest</h1><div class="sub">Turn consistent learning into measurable progress.</div></div><div><span class="pill">DAILY TARGET · 2–3 HOURS</span></div></div>
+<div class="grid">
+ <div class="card"><div class="muted">Total study time</div><div class="metric" id="hours">0h</div><div class="muted">Across all sessions</div></div>
+ <div class="card"><div class="muted">Current streak</div><div class="metric" id="streak">0 🔥</div><div class="muted">Consecutive study days</div></div>
+ <div class="card"><div class="muted">XP earned</div><div class="metric" id="xp">0 <small>XP</small></div><div class="muted" id="rank">Novice · Level 1</div></div>
+ <div class="card"><div class="muted">Study sessions</div><div class="metric" id="sessions">0</div><div class="muted">Logged sessions</div></div>
+</div>
+<div class="layout">
+ <div class="card"><div class="section-title"><h2>🗺️ Course campaign</h2><span class="pill" id="coursecount">0 courses</span></div><div id="courses"></div></div>
+ <div class="card"><div class="section-title"><h2>🎯 Skill levels</h2><span class="muted">Self-assessed · 0–100</span></div><div id="skills"></div><div class="muted" style="font-size:12px">Update these levels as you complete quizzes and projects. They are not automatic test scores.</div></div>
+ <div class="card"><div class="section-title"><h2>➕ Log a study session</h2><span class="xp">+ XP per session</span></div>
+ <form id="logform">
+ <div class="formgrid"><div><label>Date</label><input type="date" id="date" required></div><div><label>Duration (minutes)</label><input type="number" id="duration" min="1" max="1440" value="90" required></div></div>
+ <label>Course / topic</label><select id="course"></select>
+ <label>What did you work on?</label><input id="topic" placeholder="e.g. SQL window functions" required>
+ <label>Notes / blocker (optional)</label><textarea id="notes" rows="2" placeholder="What clicked? What needs practice?"></textarea>
+ <div style="display:flex;gap:10px;margin-top:14px"><button type="submit">Save session · earn XP</button><button class="secondary" type="reset">Clear</button></div></form></div>
+ <div class="card"><div class="section-title"><h2>📜 Recent activity</h2><button class="secondary" id="export">Export CSV</button></div><div id="logs"></div></div>
+</div>
+<div class="card" style="margin-top:16px"><div class="section-title"><h2>🏆 Achievements</h2><span class="muted">Unlock as you progress</span></div><div id="badges" class="muted"></div></div>
+<footer>DataQuest saves entries in this browser on this device using local storage. Export CSV regularly for backup. Clearing browser data or switching devices will not sync your records.</footer>
+</main><div id="toast"></div>
+<script>
+const defaultCourses=[
+ ["SQL Foundations","SQL",0],["Python for Data Engineering","Python",0],["Data Engineering Zoomcamp","Zoomcamp",0],
+ ["Docker & PostgreSQL","Docker / PostgreSQL",0],["PySpark & Apache Spark","PySpark",0],["Snowflake","Snowflake",0],
+ ["Airflow & Orchestration","Airflow",0],["dbt & Data Modeling","dbt",0],["Kafka & Streaming","Kafka",0],["Cloud & Capstone Projects","Cloud / Projects",0]
+];
+const defaultSkills=[["SQL",15],["Python",15],["PySpark",5],["Data Modeling",5],["Snowflake",0],["Airflow",0],["dbt",0],["Kafka",0]];
+let state=JSON.parse(localStorage.getItem("dataquest-v1")||"null")||{courses:defaultCourses.map(c=>({name:c[0],tag:c[1],progress:c[2]})),skills:defaultSkills.map(s=>({name:s[0],level:s[1]})),logs:[]};
+const $=id=>document.getElementById(id); const today=()=>new Date().toISOString().slice(0,10);
+$("date").value=today();
+function save(){localStorage.setItem("dataquest-v1",JSON.stringify(state));render()}
+function days(){return [...new Set(state.logs.map(x=>x.date))].sort()}
+function streak(){let ds=days();if(!ds.length)return 0;let n=0,d=new Date(today());if(!ds.includes(today()))d.setDate(d.getDate()-1);while(ds.includes(d.toISOString().slice(0,10))){n++;d.setDate(d.getDate()-1)}return n}
+function totalXP(){return state.logs.reduce((a,x)=>a+x.minutes,0)+state.logs.length*25}
+function render(){
+ let mins=state.logs.reduce((a,x)=>a+x.minutes,0),xp=totalXP(),level=Math.floor(xp/500)+1;
+ $("hours").textContent=(mins/60).toFixed(1)+"h";$("streak").textContent=streak()+" 🔥";$("xp").innerHTML=xp+' <small>XP</small>';$("sessions").textContent=state.logs.length;$("rank").textContent=["Novice","Apprentice","Builder","Engineer","Architect"][Math.min(4,level-1)]+" · Level "+level;
+ $("coursecount").textContent=state.courses.length+" courses";
+ $("courses").innerHTML=state.courses.map((c,i)=>`<div class="course"><div class="coursehead"><strong>${esc(c.name)}</strong><span class="pill">${c.progress}%</span></div><div class="bar"><span style="width:${c.progress}%"></span></div><label>Course completion</label><input type="range" min="0" max="100" value="${c.progress}" data-course="${i}" aria-label="${esc(c.name)} progress"></div>`).join("");
+ $("course").innerHTML=state.courses.map(c=>`<option>${esc(c.name)}</option>`).join("");
+ $("skills").innerHTML=state.skills.map((s,i)=>`<div class="skill"><strong>${esc(s.name)}</strong><div class="bar"><span style="width:${s.level}%"></span></div><input style="padding:4px" type="number" min="0" max="100" value="${s.level}" data-skill="${i}" aria-label="${esc(s.name)} skill level"></div>`).join("");
+ $("logs").innerHTML=state.logs.slice().reverse().slice(0,8).map(x=>`<div class="log"><div><strong>${esc(x.topic)}</strong><div class="muted">${esc(x.course)} · ${x.date} · ${x.minutes} min</div></div><div class="xp">+${x.minutes+25} XP</div></div>`).join("")||'<div class="empty">No sessions yet. Log your first study quest!</div>';
+ const badges=[];if(state.logs.length>=1)badges.push("🌱 First Quest");if(streak()>=3)badges.push("🔥 3-day streak");if(streak()>=7)badges.push("⚔️ Week Warrior");if(mins>=600)badges.push("⏳ 10-hour milestone");if(xp>=1000)badges.push("💎 1,000 XP");$("badges").textContent=badges.join("  ·  ")||"Your first achievement is waiting.";
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+$("logform").addEventListener("submit",e=>{e.preventDefault();let item={date:$("date").value,minutes:Number($("duration").value),course:$("course").value,topic:$("topic").value.trim(),notes:$("notes").value.trim()};if(!item.topic)return;state.logs.push(item);let course=state.courses.find(c=>c.name===item.course);if(course)course.progress=Math.min(100,course.progress+Math.max(1,Math.round(item.minutes/180)));save();$("topic").value="";$("notes").value="";toast("Quest logged! +"+(item.minutes+25)+" XP")});
+$("courses").addEventListener("input",e=>{if(e.target.dataset.course!==undefined){state.courses[+e.target.dataset.course].progress=+e.target.value;save()}});
+$("skills").addEventListener("change",e=>{if(e.target.dataset.skill!==undefined){state.skills[+e.target.dataset.skill].level=Math.max(0,Math.min(100,+e.target.value));save()}});
+$("export").onclick=()=>{let rows=[["date","minutes","course","topic","notes"],...state.logs.map(x=>[x.date,x.minutes,x.course,x.topic,x.notes])];let csv=rows.map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\n");let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="dataquest-study-log.csv";a.click();URL.revokeObjectURL(a.href)};
+function toast(t){$("toast").textContent=t;$("toast").style.display="block";setTimeout(()=>$("toast").style.display="none",2200)}
+render();
+</script></body></html>

@@ -90,7 +90,7 @@ let state=JSON.parse(localStorage.getItem("dataquest-v1")||"null")||{courses:def
 for(const course of state.courses){if(!Array.isArray(course.levels)){const legacy=Array.isArray(course.topics)?course.topics:[];course.levels=makeCurriculum(course.name);for(const old of legacy){if(old.progress>0)course.levels[0].groups.push({name:"Previously tracked: "+old.name,concepts:[{name:old.name,done:old.progress>=100}]})}delete course.topics;}course.progress=courseProgress(course)}
 const $=id=>document.getElementById(id);const pad=n=>String(n).padStart(2,"0");const today=()=>{let d=new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())};$("date").value=today();
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function save(){localStorage.setItem("dataquest-v1",JSON.stringify(state));render()}
+function save(){const scrollX=window.scrollX,scrollY=window.scrollY,openDetails=[...$("courses").querySelectorAll("details")].map((node,index)=>node.open?index:-1).filter(index=>index>=0);localStorage.setItem("dataquest-v1",JSON.stringify(state));render();const details=$("courses").querySelectorAll("details");openDetails.forEach(index=>{if(details[index])details[index].open=true});window.scrollTo(scrollX,scrollY)}
 function dayList(){return [...new Set(state.logs.map(x=>x.date))].sort()}
 function streak(){let ds=dayList(),d=new Date(today()+"T12:00:00");if(!ds.includes(today()))d.setDate(d.getDate()-1);let n=0;while(ds.includes(d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()))){n++;d.setDate(d.getDate()-1)}return n}
 function xpTotal(){return state.logs.reduce((a,x)=>a+x.minutes,0)+state.logs.length*25}
